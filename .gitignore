@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Training data (download with training/download_data.py)
+/data/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

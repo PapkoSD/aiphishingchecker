@@ -1,0 +1,21 @@
+From: "Online Store" <orders@shop.example.com>
+To: you@example.com
+Subject: Your order #40-2291 has shipped
+Date: Thu, 23 Oct 2026 15:02:11 +0000
+Message-ID: <shipping.402291@shop.example.com>
+Authentication-Results: mx.example.com; spf=pass smtp.mailfrom=shop.example.com; dkim=pass header.d=example.com; dmarc=pass header.from=example.com
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+Hi Anna,
+
+Good news! Your order #40-2291 is on its way.
+
+  1x Wireless headphones
+
+Estimated delivery: Monday, 27 October.
+
+You can follow your parcel any time in the Orders section of your account on our website.
+
+Thanks for shopping with us,
+The Online Store team

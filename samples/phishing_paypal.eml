@@ -1,0 +1,37 @@
+From: "PayPal Service" <service@paypal-account-security.com>
+Reply-To: support.paypal@mail-help-center.net
+To: you@example.com
+Subject: Your account has been limited
+Date: Fri, 24 Oct 2026 08:14:02 +0000
+Message-ID: <20261024081402.48213@paypal-account-security.com>
+Authentication-Results: mx.example.com; spf=fail smtp.mailfrom=paypal-account-security.com; dkim=none; dmarc=fail header.from=paypal-account-security.com
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset="utf-8"
+
+Dear Customer,
+
+We noticed unusual activity on your PayPal account. As a security precaution your account access has been limited.
+
+To restore full access, please confirm your identity within 24 hours: https://www.paypal.com/restore
+
+If you do not verify your information, your account will be permanently suspended.
+
+Thank you,
+PayPal Security Team
+
+--b1
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<p>Dear Customer,</p>
+<p>We noticed unusual activity on your PayPal account. As a security precaution your account access has been <b>limited</b>.</p>
+<p>To restore full access, please confirm your identity within 24 hours:</p>
+<p><a href="http://paypal.com.account-restore.xyz/webscr/login.php?id=8812">https://www.paypal.com/restore</a></p>
+<p>If you do not verify your information, your account will be permanently suspended.</p>
+<p>Thank you,<br>PayPal Security Team</p>
+</body></html>
+
+--b1--

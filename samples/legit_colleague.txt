@@ -1,0 +1,8 @@
+Hi Patrik,
+
+Thanks for the notes from yesterday's call. I went through the test plan and added a few regression cases for the checkout page, mainly the coupon field and the address validation.
+
+Could we go through the release checklist tomorrow at 10? If that doesn't work, Thursday morning is fine too.
+
+Cheers,
+Lucia

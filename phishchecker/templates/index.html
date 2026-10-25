@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if result %}{{ {'phishing': 'Likely phishing', 'suspicious': 'Suspicious', 'safe': 'Looks safe'}[result.verdict] }} | {% endif %}Phishing Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+{% set stamp_words = {'phishing': 'Likely phishing', 'suspicious': 'Suspicious', 'safe': 'Looks safe'} %}
+{% set marks = {'danger': '✕', 'warning': '!', 'good': '✓', 'info': 'i'} %}
+
+<header class="masthead">
+  <a class="brand" href="{{ url_for('index') }}">
+    <img src="{{ url_for('static', filename='icon.svg') }}" alt="" width="28" height="28">
+    Phishing Checker
+  </a>
+  <p class="privacy">Runs on your computer. Nothing you paste is sent anywhere.</p>
+</header>
+
+<main>
+  <h1>Is this email or link a scam?</h1>
+  <p class="lede">Paste it below. A machine-learning model trained on thousands of real phishing emails and links checks it and tells you what gave it away.</p>
+
+  <nav class="tabs" aria-label="What to check">
+    <a href="{{ url_for('index') }}" {% if tab == 'email' %}aria-current="page"{% endif %}>Email or message</a>
+    <a href="{{ url_for('index', tab='url') }}" {% if tab == 'url' %}aria-current="page"{% endif %}>Link</a>
+  </nav>
+
+  {% if tab == 'email' %}
+  <form class="sheet" method="post" action="{{ url_for('check_email') }}" enctype="multipart/form-data">
+    <label for="text">Paste the email or text message</label>
+    <textarea id="text" name="text" rows="11" spellcheck="false"
+      placeholder="Copy the whole message, including the subject line if there is one. For the most thorough check, use &quot;Show original&quot; in Gmail (or &quot;View source&quot; in Outlook) and paste everything.">{{ email_text or '' }}</textarea>
+    <div class="actions">
+      <div class="upload">
+        <label for="eml">Or upload a saved email (.eml)</label>
+        <input id="eml" name="eml" type="file" accept=".eml,message/rfc822">
+      </div>
+      <button class="check" type="submit">Check email</button>
+    </div>
+  </form>
+  <form class="examples" method="post" action="{{ url_for('check_email') }}">
+    <p>No email handy? Try an example:</p>
+    <div class="example-list">
+      {% for file, label in email_samples.items() %}
+      <button type="submit" name="sample" value="{{ file }}">{{ label }}</button>
+      {% endfor %}
+    </div>
+  </form>
+  {% else %}
+  <form class="sheet" method="post" action="{{ url_for('check_url') }}">
+    <label for="url">Paste the link</label>
+    <input id="url" name="url" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+      placeholder="https://..." value="{{ url_text or '' }}">
+    <p class="hint">Copy the link's address by right-clicking it (or long-pressing on a phone). Don't open it first.</p>
+    <div class="actions">
+      <button class="check" type="submit">Check link</button>
+    </div>
+  </form>
+  <form class="examples" method="post" action="{{ url_for('check_url') }}">
+    <p>Try an example:</p>
+    <div class="example-list">
+      {% for url in url_samples %}
+      <button type="submit" name="url" value="{{ url }}" class="url-text">{{ url }}</button>
+      {% endfor %}
+    </div>
+  </form>
+  {% endif %}
+
+  {% if error %}
+  <p class="error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  {% if result %}
+  {# No model is ever 0% or 100% sure, so the shown number stays between 1 and 99. #}
+  {% set pct = [[(result.score * 100) | round | int, 1] | max, 99] | min %}
+  <section class="result verdict-{{ result.verdict }}" aria-labelledby="result-title" id="result">
+    <div class="stamp">
+      <span class="stamp-word">{{ stamp_words[result.verdict] }}</span>
+      <span class="stamp-score">{{ pct }}% phishing risk</span>
+    </div>
+    <h2 id="result-title" class="visually-hidden">Result: {{ stamp_words[result.verdict] }}, {{ pct }}% phishing risk</h2>
+
+    <dl class="checked">
+      {% if result.type == 'url' %}
+        <dt>Link</dt><dd class="url-text">{{ result.url }}</dd>
+        <dt>Website</dt><dd class="url-text">{{ result.host }}</dd>
+      {% else %}
+        {% if result.subject %}<dt>Subject</dt><dd>{{ result.subject }}</dd>{% endif %}
+        {% if result.sender %}<dt>From</dt><dd>{% if result.sender_name %}{{ result.sender_name }} {% endif %}<span class="url-text">&lt;{{ result.sender }}&gt;</span></dd>{% endif %}
+        {% if result.attachments %}<dt>Attachments</dt><dd>{{ result.attachments | join(', ') }}</dd>{% endif %}
+      {% endif %}
+    </dl>
+
+    <h3>Why</h3>
+    <ul class="reasons">
+      {% for reason in result.reasons %}
+      <li class="reason reason-{{ reason.level }}"><span class="mark" aria-hidden="true">{{ marks[reason.level] }}</span>{{ reason.text }}</li>
+      {% endfor %}
+    </ul>
+
+    {% if result.links %}
+    <h3>Links in this email</h3>
+    <p class="hint">Shown as text only, so you can't click them by accident.</p>
+    <ul class="links">
+      {% for link in result.links %}
+      <li class="link verdict-{{ link.verdict }}">
+        <span class="link-verdict">{{ stamp_words[link.verdict] }}</span>
+        <span class="link-host url-text">{{ link.host }}</span>
+        <span class="link-url url-text">{{ link.url }}</span>
+        {% if link.text and link.text != link.url %}<span class="link-shown">Shown in the email as "{{ link.text }}"</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="advice">
+      <h3>What to do</h3>
+      {% if result.verdict == 'phishing' %}
+      <p>Don't click any links, open attachments or reply. If it claims to be from a company you use, go to their website or app yourself instead of following the message. Then report it as phishing and delete it.</p>
+      {% elif result.verdict == 'suspicious' %}
+      <p>Be careful. Check who really sent it and where links lead before you click. If in doubt, contact the company using a phone number or website you already know.</p>
+      {% else %}
+      <p>Nothing here looks like phishing. Still, never enter a password or card number on a page you reached from a message, and go to the website directly instead.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="how" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <p>Two models run on your computer. One reads the wording of emails and text messages, the other looks at the structure of links. Both were trained on public collections of real phishing and legitimate messages. On top of the models, the checker compares links with a list of official websites, spots look-alike domains such as paypa1.com, and checks whether the sender's name, address and authentication match.</p>
+    {% if metrics %}
+    <div class="metrics">
+      {% if metrics.email %}
+      <p><strong>Email model:</strong> {{ (metrics.email.accuracy * 100) | round(1) }}% accurate on {{ '{:,}'.format(metrics.email.test_size) }} messages it never saw during training.</p>
+      {% endif %}
+      {% if metrics.url %}
+      <p><strong>Link model:</strong> {{ (metrics.url.accuracy * 100) | round(1) }}% accurate on {{ '{:,}'.format(metrics.url.test_size) }} links from websites it never saw during training.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+    <p class="disclaimer">No checker catches everything, and new scams appear every day. It only understands English. Treat the result as a second opinion, not a guarantee.</p>
+  </section>
+</main>
+
+<footer>
+  <span>Phishing Checker {{ version }}</span>
+  <a href="https://github.com/PapkoSD/aiphishingchecker">Source code on GitHub</a>
+</footer>
+</body>
+</html>

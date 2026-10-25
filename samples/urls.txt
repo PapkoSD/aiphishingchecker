@@ -1,0 +1,18 @@
+# Example links to paste into the "Link" tab.
+# The phishing-style ones use made-up domains. Don't visit any of them.
+
+# Phishing-style
+http://paypal.com.account-restore.xyz/webscr/login.php
+https://rnicrosoft-office365.com/login
+https://www.google.com/url?q=http://secure-bank-update.top/verify
+http://192.168.10.5/banking/login.php
+https://appleid.apple.com-verify-account.info/
+https://netflix-billing-update.net/account
+
+# Legitimate
+https://github.com/PapkoSD/aiphishingchecker
+https://www.paypal.com/signin
+https://en.wikipedia.org/wiki/Phishing
+
+# Can't tell: shortened links hide where they go
+bit.ly/3xYzAb

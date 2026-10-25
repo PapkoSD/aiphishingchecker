@@ -1,0 +1,9 @@
+# The model files were saved with this scikit-learn version. Keep it pinned,
+# or retrain the models (see README) if you change it.
+scikit-learn==1.9.1
+numpy>=2.0
+scipy>=1.13
+joblib>=1.4
+tldextract>=5.3
+flask>=3.0
+waitress>=3.0
